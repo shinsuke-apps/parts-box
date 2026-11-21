@@ -1,6 +1,6 @@
 // 手加工用図面（SVG）の生成
-import { V } from './geometry.js?v=20261122m';
-import { layoutBoards, kidoriSummary, boardSVG } from './kidori.js?v=20261122m';
+import { V } from './geometry.js?v=20261122n';
+import { layoutBoards, kidoriSummary, boardSVG } from './kidori.js?v=20261122n';
 
 const { sub, add, mul, dot, cross } = V;
 const S2 = Math.SQRT2;
