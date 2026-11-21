@@ -33,7 +33,7 @@ export class View3D {
     this.labels = new CSS2DRenderer();
     this.labels.domElement.className = 'dimlayer';
     el.appendChild(this.labels.domElement);
-    this.opts = { explode: false, stack: false, dims: ['out'] };
+    this.opts = { explode: false, levels: 1, dims: ['out'] };
     this.fitted = false;
     new ResizeObserver(() => this.resize()).observe(el);
     const loop = () => {
@@ -62,31 +62,36 @@ export class View3D {
     if (!box) return;
     this.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
     this.group.clear();
-    const levels = this.opts.stack ? 2 : 1;
+    const levels = Math.max(1, Math.min(10, this.opts.levels || 1)); // 積む段数
+    const cols = Math.max(1, Math.min(10, this.opts.cols || 1));     // 横に並べる数（すき間なしで隣り合わせ）
     const ex = this.opts.explode ? Math.max(box.v.W, box.v.H) * 0.22 : 0;
-    for (let L = 0; L < levels; L++) {
-      for (const part of box.parts) {
-        const o = part.outward, ol = Math.hypot(...o);
-        const off = [o[0] / ol * ex, o[1] / ol * ex, o[2] / ol * ex + L * box.v.stackPitch];
-        this.group.add(this.partObject(part, off));
+    for (let C = 0; C < cols; C++) {
+      for (let L = 0; L < levels; L++) {
+        for (const part of box.parts) {
+          const o = part.outward, ol = Math.hypot(...o);
+          const off = [o[0] / ol * ex + C * (box.v.W + 2 * ex), o[1] / ol * ex, o[2] / ol * ex + L * box.v.stackPitch];
+          this.group.add(this.partObject(part, off));
+        }
       }
     }
     this.buildDims();
   }
 
   // ---------- 寸法線 ----------
-  // 分解・2段積みのときは板が動くので出さない
+  // 分解のときは板が動くので出さない。積んだときは外寸に全体の高さと1段の高さ、内寸はいちばん上の箱に出す
   buildDims() {
     this.dimGroup.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); if (o.element) o.element.remove(); });
     this.dimGroup.clear();
     // dims: 出す寸法の組（'out' 外寸・'in' 内寸）。両方なら両方出す
     const modes = [].concat(this.opts.dims || []).filter(Boolean);
-    if (!modes.length || this.opts.explode || this.opts.stack || !this.box) return;
+    if (!modes.length || this.opts.explode || !this.box) return;
     for (const mode of modes) this.buildDimSet(mode);
   }
 
   buildDimSet(mode) {
     const v = this.box.v, hw = v.W / 2, t = v.t, S2 = Math.SQRT2;
+    const n = Math.max(1, Math.min(10, this.opts.levels || 1)), p = v.stackPitch;
+    const Htot = v.H + (n - 1) * p;                 // 積んだ全体の高さ
     const off = Math.max(v.W, v.depth, v.H) * 0.08, tk = off * 0.18;
     const segs = [];
     const seg = (a, b) => segs.push(a, b);
@@ -109,29 +114,45 @@ export class View3D {
       const yw = -v.H / 2 - off;
       seg([-hw, -v.H / 2, v.H / 2], [-hw, yw - tk, v.H / 2]); seg([hw, -v.H / 2, v.H / 2], [hw, yw - tk, v.H / 2]);
       dimLine([-hw, yw, v.H / 2], [hw, yw, v.H / 2], [0, 1, 0], f(v.W), 'out');
-      // 奥行（先端まで）：右側の床の高さ
-      const xd = hw + off;
-      seg([hw, v.D, 0], [xd + tk, v.D, 0]);
-      seg([hw, -v.H / 2, v.H / 2], [hw, -v.H / 2, 0]); seg([hw, -v.H / 2, 0], [xd + tk, -v.H / 2, 0]);
+      // 横に並べたときは全体の幅（さらに手前）
+      const nc = Math.max(1, Math.min(10, this.opts.cols || 1));
+      if (nc > 1) {
+        const yw2 = yw - off * 0.9, xr = -hw + nc * v.W;
+        seg([-hw, yw, v.H / 2], [-hw, yw2 - tk, v.H / 2]); seg([xr, -v.H / 2, v.H / 2], [xr, yw2 - tk, v.H / 2]);
+        dimLine([-hw, yw2, v.H / 2], [xr, yw2, v.H / 2], [0, 1, 0], `全体 ${f(nc * v.W)}`, 'out');
+      }
+      // 奥行（先端まで）：いちばん右の箱の右側、床の高さ
+      const xe = hw + (nc - 1) * v.W, xd = xe + off;
+      seg([xe, v.D, 0], [xd + tk, v.D, 0]);
+      seg([xe, -v.H / 2, v.H / 2], [xe, -v.H / 2, 0]); seg([xe, -v.H / 2, 0], [xd + tk, -v.H / 2, 0]);
       dimLine([xd, -v.H / 2, 0], [xd, v.D, 0], [1, 0, 0], f(v.depth), 'out');
-      // 高さ：右後ろの角
-      seg([hw, v.D, v.H], [xd + tk, v.D, v.H]);
-      dimLine([xd, v.D, 0], [xd, v.D, v.H], [1, 0, 0], f(v.H), 'out');
+      // 高さ：いちばん右の箱の右後ろの角（積んだときは全体の高さ）
+      seg([xe, v.D, Htot], [xd + tk, v.D, Htot]);
+      dimLine([xd, v.D, 0], [xd, v.D, Htot], [1, 0, 0], n > 1 ? `全体 ${f(Htot)}` : f(v.H), 'out');
+      // 積んだときは1段の高さ（下の箱の底 → 2段目の箱の底）を左後ろの角に
+      if (n > 1) {
+        const xl = -hw - off;
+        seg([-hw, v.D, 0], [xl - tk, v.D, 0]); seg([-hw, v.D, p], [xl - tk, v.D, p]);
+        dimLine([xl, v.D, 0], [xl, v.D, p], [1, 0, 0], `1段 ${f(p)}`, 'out');
+      }
     } else {
       color = 0x1f5fa8;
+      // 積んだときは、いちばん上の箱に出す（上から見える箱）
+      const zo = (n - 1) * p;
+      const dimLineZ = (a, b, nn, text, cls) => dimLine([a[0], a[1], a[2] + zo], [b[0], b[1], b[2] + zo], nn, text, cls);
       const xi = hw - t, yb = v.D - t, yf = t * S2 - t, zf = t + 0.5;
       const id = v.D - t * S2, ih = v.H - t;
       const m = Math.min(off * 0.6, (v.W - 2 * t) * 0.15);
       // 幅：底面の奥寄り
       const yw = yb - Math.min(off * 0.6, id * 0.2);
-      dimLine([-xi, yw, zf], [xi, yw, zf], [0, 1, 0], f(v.W - 2 * t), 'in');
+      dimLineZ([-xi, yw, zf], [xi, yw, zf], [0, 1, 0], f(v.W - 2 * t), 'in');
       // 奥行（底面）：左寄りの床の上
-      dimLine([-xi + m, yf, zf], [-xi + m, yb, zf], [1, 0, 0], f(id), 'in');
+      dimLineZ([-xi + m, yf, zf], [-xi + m, yb, zf], [1, 0, 0], f(id), 'in');
       // 深さ：左奥の角
-      dimLine([-xi + m, yb - 0.5, t], [-xi + m, yb - 0.5, v.H], [1, 0, 0], f(ih), 'in');
+      dimLineZ([-xi + m, yb - 0.5, t], [-xi + m, yb - 0.5, v.H], [1, 0, 0], f(ih), 'in');
       // 前板の上端の高さでの奥行（いちばん広いところ、参考）
       const zr = v.H / 2 + t / S2;
-      dimLine([-xi + m, -v.H / 2 + t / S2, zr], [-xi + m, yb, zr], [1, 0, 0], '前板の上で ' + f(v.depth - t * (1 + 1 / S2)), 'in sub');
+      dimLineZ([-xi + m, -v.H / 2 + t / S2, zr], [-xi + m, yb, zr], [1, 0, 0], '前板の上で ' + f(v.depth - t * (1 + 1 / S2)), 'in sub');
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(segs.flatMap((p) => { const q = T(p); return [q.x, q.y, q.z]; }), 3));

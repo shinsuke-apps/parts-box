@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122v';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122v';
-import { PrintView } from './print3d.js?v=20261122v';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122v';
-import { buildSheets, fmt } from './drawing.js?v=20261122v';
-import { View3D } from './view3d.js?v=20261122v';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122w';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122w';
+import { PrintView } from './print3d.js?v=20261122w';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122w';
+import { buildSheets, fmt } from './drawing.js?v=20261122w';
+import { View3D } from './view3d.js?v=20261122w';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -176,7 +176,8 @@ function bind() {
   $('#kd-w').addEventListener('input', kdChange);
   $('#kd-a').addEventListener('input', kdChange);
   $('#o-explode').addEventListener('change', (e) => view.setOpts({ explode: e.target.checked }));
-  $('#o-stack').addEventListener('change', (e) => { view.setOpts({ stack: e.target.checked }); view.fit(); });
+  $('#o-levels').addEventListener('change', (e) => { view.setOpts({ levels: +e.target.value }); view.fit(); });
+  $('#o-cols').addEventListener('change', (e) => { view.setOpts({ cols: +e.target.value }); view.fit(); });
   $('#fit').addEventListener('click', () => view.fit());
   // 3Dプリント用：一塊の立体を STL で保存
   $('#stl').addEventListener('click', () => {

@@ -6,7 +6,7 @@
 <title>パーツ箱ジェネレーター</title>
 <meta name="description" content="寸法を変えるだけで、留め組みのパーツ箱の3Dモデルと手加工用の図面ができるツール">
 <meta name="author" content="Shinsuke Kato">
-<link rel="stylesheet" href="style.css?v=20261122v">
+<link rel="stylesheet" href="style.css?v=20261122w">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -108,7 +108,8 @@
           <button class="seg-b" data-dims="in" aria-pressed="false">内寸</button>
         </div>
         <label><input type="checkbox" id="o-explode"> 分解</label>
-        <label><input type="checkbox" id="o-stack"> 2段積み</label>
+        <label>積む <select id="o-levels"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select> 段</label>
+        <label>横に <select id="o-cols"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select> 個</label>
         <button id="fit">全体表示</button>
       </div>
     </div>
@@ -143,6 +144,6 @@
 <div id="print-area" class="print-area"></div>
 <div id="toast" class="toast" hidden></div>
 
-<script type="module" src="src/main.js?v=20261122v"></script>
+<script type="module" src="src/main.js?v=20261122w"></script>
 </body>
 </html>
