@@ -8,7 +8,7 @@ const T = (p) => [p[0], p[2], -p[1]];
 export class PrintView {
   constructor(el) {
     this.el = el;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     el.appendChild(this.renderer.domElement);
     this.scene = new THREE.Scene();
@@ -18,6 +18,7 @@ export class PrintView {
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 1.5));
     const dl = new THREE.DirectionalLight(0xffffff, 1.7); dl.position.set(1, 1.6, 1.2); this.scene.add(dl);
     const dl2 = new THREE.DirectionalLight(0xffffff, 0.5); dl2.position.set(-1.2, 0.5, -0.8); this.scene.add(dl2);
+    const dl3 = new THREE.DirectionalLight(0xffffff, 0.9); dl3.position.set(0.4, -1, 0.6); this.scene.add(dl3); // 底を下から見たときも暗くなりすぎないように
     this.group = new THREE.Group();
     this.scene.add(this.group);
     this.fitted = false;
