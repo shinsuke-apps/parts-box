@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122s';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122s';
-import { PrintView } from './print3d.js?v=20261122s';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122s';
-import { buildSheets, fmt } from './drawing.js?v=20261122s';
-import { View3D } from './view3d.js?v=20261122s';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122t';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122t';
+import { PrintView } from './print3d.js?v=20261122t';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122t';
+import { buildSheets, fmt } from './drawing.js?v=20261122t';
+import { View3D } from './view3d.js?v=20261122t';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -157,7 +157,16 @@ function bind() {
   // 寸法や板厚を手で変えたら、テンプレートの選択表示は外す
   $$('[data-mm],[data-k],[data-r],#g-mm,#c-mm,#auto-gc').forEach((el) => el.addEventListener('input', () => { $('#tpl').value = ''; markTpl(); }));
   $$('.tab').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
-  $('#o-dims').addEventListener('change', (e) => view.setOpts({ dims: e.target.value }));
+  // 寸法表示：オンのときだけ「外寸／内寸」を選べる
+  let dimsKind = 'out';
+  const applyDims = () => {
+    const on = $('#o-dims-on').checked;
+    $('#o-dims').hidden = !on;
+    $$('[data-dims]').forEach((b) => { b.classList.toggle('is-on', b.dataset.dims === dimsKind); b.setAttribute('aria-checked', b.dataset.dims === dimsKind); });
+    view.setOpts({ dims: on ? dimsKind : '' });
+  };
+  $('#o-dims-on').addEventListener('change', applyDims);
+  $$('[data-dims]').forEach((b) => b.addEventListener('click', () => { dimsKind = b.dataset.dims; applyDims(); }));
   // 木取りの入力（板の幅を空にすると最小の幅で計算）
   const kdChange = () => {
     const w = parseFloat($('#kd-w').value), a = parseFloat($('#kd-a').value);

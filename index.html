@@ -6,7 +6,7 @@
 <title>パーツ箱ジェネレーター</title>
 <meta name="description" content="寸法を変えるだけで、留め組みのパーツ箱の3Dモデルと手加工用の図面ができるツール">
 <meta name="author" content="Shinsuke Kato">
-<link rel="stylesheet" href="style.css?v=20261122s">
+<link rel="stylesheet" href="style.css?v=20261122t">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -102,7 +102,11 @@
     <div id="tab-model" class="pane is-on">
       <div id="view3d" class="view3d"></div>
       <div class="viewbar">
-        <label>寸法表示 <select id="o-dims"><option value="out">外寸</option><option value="in">内寸</option><option value="">なし</option></select></label>
+        <label><input type="checkbox" id="o-dims-on" checked> 寸法表示</label>
+        <div class="seg seg-dims" id="o-dims" role="radiogroup" aria-label="寸法の種類">
+          <button class="seg-b is-on" data-dims="out" role="radio" aria-checked="true">外寸</button>
+          <button class="seg-b" data-dims="in" role="radio" aria-checked="false">内寸</button>
+        </div>
         <label><input type="checkbox" id="o-explode"> 分解</label>
         <label><input type="checkbox" id="o-stack"> 2段積み</label>
         <button id="fit">全体表示</button>
@@ -139,6 +143,6 @@
 <div id="print-area" class="print-area"></div>
 <div id="toast" class="toast" hidden></div>
 
-<script type="module" src="src/main.js?v=20261122s"></script>
+<script type="module" src="src/main.js?v=20261122t"></script>
 </body>
 </html>
