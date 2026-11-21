@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122l';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122l';
-import { PrintView } from './print3d.js?v=20261122l';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122l';
-import { buildSheets, fmt } from './drawing.js?v=20261122l';
-import { View3D } from './view3d.js?v=20261122l';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122m';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122m';
+import { PrintView } from './print3d.js?v=20261122m';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122m';
+import { buildSheets, fmt } from './drawing.js?v=20261122m';
+import { View3D } from './view3d.js?v=20261122m';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -225,7 +225,7 @@ function renderPrint() {
   $('#p3-info').innerHTML = `<b>3Dプリント用の立体（一塊）</b>` +
     `外形 ${fmt(v.W)} × ${fmt(v.depth)} × ${fmt(v.H)} mm<br>` +
     `体積 約 ${(ck.volume / 1000).toFixed(0)} cm³ ・ 三角形 ${ck.triangles} ・ ${ck.badEdges ? `<span style="color:var(--warn-ink)">すき間あり（${ck.badEdges}）</span>` : 'すき間なし'}` +
-    `<small>${fill ? '底板の下を埋めています。底を下にして、支えなしで刷れます。' : '底板の下が空いています（実物どおり）。縁を下にして刷るか、支えを付けてください。'}溝の小さな穴は埋めてあります。</small>`;
+    `<small>${fill ? '底板の下を埋めています。底を下にして、支えなしで刷れます。' : '底板の下が空いています。後ろ板を下にすれば、支えなしで刷れます（そのため、底のくぼみの前の壁は底板から45°で下りる形にしています）。'}溝の小さな穴は埋めてあります。</small>`;
   printDirty = false;
 }
 
