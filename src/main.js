@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122p';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122p';
-import { PrintView } from './print3d.js?v=20261122p';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122p';
-import { buildSheets, fmt } from './drawing.js?v=20261122p';
-import { View3D } from './view3d.js?v=20261122p';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122q';
+import { solidSTL, printTriangles, checkSolid } from './solid.js?v=20261122q';
+import { PrintView } from './print3d.js?v=20261122q';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122q';
+import { buildSheets, fmt } from './drawing.js?v=20261122q';
+import { View3D } from './view3d.js?v=20261122q';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -219,13 +219,13 @@ function renderPrint() {
   if (!pview) pview = new PrintView($('#pview')); // 初めて開いたときに作る
   pview.resize();
   const fill = $('#stl-fill').checked;
-  const tris = solidTriangles(box.v, { fillFloor: fill });
+  const tris = printTriangles(box.v, { fillFloor: fill }); // 刷る向き（後ろ板が下）
   pview.setTriangles(tris);
   const ck = checkSolid(tris), v = box.v;
   $('#p3-info').innerHTML = `<b>3Dプリント用の立体（一塊）</b>` +
-    `外形 ${fmt(v.W)} × ${fmt(v.depth)} × ${fmt(v.H)} mm<br>` +
+    `造形台の上で 幅 ${fmt(v.W)} × 奥行 ${fmt(v.H)}、高さ ${fmt(v.depth)} mm<br>` +
     `体積 約 ${(ck.volume / 1000).toFixed(0)} cm³ ・ 三角形 ${ck.triangles} ・ ${ck.badEdges ? `<span style="color:var(--warn-ink)">すき間あり（${ck.badEdges}）</span>` : 'すき間なし'}` +
-    `<small>${fill ? '底を下にして刷れます（サポート不要）。' : '後ろ板を下にして刷ってください（サポート不要）。'}</small>`;
+    `<small>後ろ板を下にした向きで書き出します（サポート不要）。</small>`;
   printDirty = false;
 }
 

@@ -1,7 +1,7 @@
 // 3Dプリント用：箱を「一塊」のすき間のない立体にして STL で書き出す
 // 部材を積み上げるのではなく、外形（凸）から内側の空間（凸の組）を引いて作る。
 // そのため部材どうしの継ぎ目の面はなく、溝が前の留めに抜ける小さな穴も埋まる。
-import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122p';
+import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122q';
 
 const S2 = Math.SQRT2;
 const EPS = 1e-6;
@@ -195,11 +195,17 @@ export function checkSolid(tris) {
   return { volume: vol, triangles: tris.length, badEdges: bad };
 }
 
-// バイナリ STL（単位 mm）。左手前の下の角が原点になるように動かす
+// 刷る向き：後ろ板を下（造形台）にして、前が上を向く向きに回す（Z が上）。
+// (x, y, z) → (x + W/2, z, D − y)。回転なので面の向き（表裏）は変わらない。
+// 造形台の上では 幅 W × 奥行 H、高さ（Z）は全奥行 D + H/2 になる
+export function toPrint(v, p) { return [p[0] + v.W / 2, p[2], v.D - p[1]]; }
+export function printTriangles(v, opt) { return solidTriangles(v, opt).map((t) => t.map((p) => toPrint(v, p))); }
+
+// バイナリ STL（単位 mm）。刷る向き（後ろ板が下）で、すべての座標が 0 以上になるように置く
 export function solidSTL(params, opt) {
   const v = derive(params);
-  const tris = solidTriangles(v, opt);
-  const off = [v.W / 2, v.H / 2, 0];
+  const tris = printTriangles(v, opt);
+  const off = [0, 0, 0];
   const buf = new ArrayBuffer(84 + tris.length * 50);
   const dv = new DataView(buf);
   const head = 'parts-box (Shinsuke Kato) - mm';
