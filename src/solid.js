@@ -1,7 +1,7 @@
 // 3Dプリント用：箱を「一塊」のすき間のない立体にして STL で書き出す
 // 部材を積み上げるのではなく、外形（凸）から内側の空間（凸の組）を引いて作る。
 // そのため部材どうしの継ぎ目の面はなく、溝が前の留めに抜ける小さな穴も埋まる。
-import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122n';
+import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122o';
 
 const S2 = Math.SQRT2;
 const EPS = 1e-6;
@@ -32,8 +32,9 @@ export function solidSpec(v, { fillFloor = true } = {}) {
   // 底板の下のすき間。前の壁は前板の内面（y+z=t√2）ではなく、逆向きの45°（y−z=t√2）にする。
   // 後ろ板を下にして刷ると、前板の内面のままでは壁が箱の底の縁（支えのない所）から張り出し始め、
   // 最初の1本が側板どうしに掛かる橋になる。逆向きなら底板の下の面から張り出し始めるので支えなしで刷れる。
-  // 底の縁では前から t の位置（y=t）。側板・背板の底の縁（面取りを含めて外から t）と幅をそろえる。
-  if (!fillFloor) cutters.push(inner(-10, t - g, hs([0, -1, 1], -t)));
+  // 底の縁では前から t−c の位置。側板・背板は外側の面取り c の内側に平らな縁 t−c が残るので、
+  // 前（面取りの代わりに斜面がある）の平らな縁も t−c にして、下から見た幅をそろえる。
+  if (!fillFloor) cutters.push(inner(-10, t - g, hs([0, -1, 1], -(t - c))));
   // 上の内側の面取り（側板）。留めの面で背板の面取りと分ける
   for (const s of [1, -1]) {
     const X = (n) => [n[0] * s, n[1], n[2]];

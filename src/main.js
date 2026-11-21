@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122n';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122n';
-import { PrintView } from './print3d.js?v=20261122n';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122n';
-import { buildSheets, fmt } from './drawing.js?v=20261122n';
-import { View3D } from './view3d.js?v=20261122n';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122o';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122o';
+import { PrintView } from './print3d.js?v=20261122o';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122o';
+import { buildSheets, fmt } from './drawing.js?v=20261122o';
+import { View3D } from './view3d.js?v=20261122o';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
