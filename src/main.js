@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122h';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122h';
-import { PrintView } from './print3d.js?v=20261122h';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122h';
-import { buildSheets, fmt } from './drawing.js?v=20261122h';
-import { View3D } from './view3d.js?v=20261122h';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122j';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122j';
+import { PrintView } from './print3d.js?v=20261122j';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122j';
+import { buildSheets, fmt } from './drawing.js?v=20261122j';
+import { View3D } from './view3d.js?v=20261122j';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -324,4 +324,4 @@ $('#ver').textContent = `作者 Shinsuke Kato ・ バージョン ${APP_VERSION}
 bind();
 markTpl();
 update();
-window.__pmc = { buildBox, derive, view, buildSheets, validate, dims, capacity, get params() { return params; } };
+window.__pmc = { buildBox, derive, view, buildSheets, validate, dims, capacity, get params() { return params; }, get pview() { return pview; } };

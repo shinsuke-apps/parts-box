@@ -23,7 +23,12 @@ export class PrintView {
     this.fitted = false;
     new ResizeObserver(() => this.resize()).observe(el);
     const loop = () => {
-      if (this.el.offsetParent !== null) { this.controls.update(); this.renderer.render(this.scene, this.camera); } // 見えているときだけ描く
+      if (this.el.offsetParent !== null) { // 見えているときだけ描く
+        this.controls.update();
+        // 下から見るときは造形台の網目が底に重なって見づらいので消す
+        if (this.grid) this.grid.visible = this.camera.position.y > this.grid.position.y;
+        this.renderer.render(this.scene, this.camera);
+      }
       requestAnimationFrame(loop);
     };
     loop();
@@ -54,7 +59,9 @@ export class PrintView {
     const span = Math.ceil((Math.max(size.x, size.z) * 1.3) / 20) * 20;
     const grid = new THREE.GridHelper(span, span / 10, 0x9a9187, 0xcfc8bd);
     grid.position.set(c.x, b.min.y - 0.05, c.z);
+    grid.material.transparent = true; grid.material.opacity = 0.6; // 上から見るときも少し薄く
     this.group.add(grid);
+    this.grid = grid;
     if (!this.fitted) { this.resize(); this.fit(); this.fitted = true; }
   }
 
