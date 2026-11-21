@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122w';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122w';
-import { PrintView } from './print3d.js?v=20261122w';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122w';
-import { buildSheets, fmt } from './drawing.js?v=20261122w';
-import { View3D } from './view3d.js?v=20261122w';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122x';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122x';
+import { PrintView } from './print3d.js?v=20261122x';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122x';
+import { buildSheets, fmt } from './drawing.js?v=20261122x';
+import { View3D } from './view3d.js?v=20261122x';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -329,7 +329,7 @@ function toast(s) {
 const view = new View3D($('#view3d'));
 readHash();
 // アプリの版（直したら上げる。index.html と import の ?v= も合わせて変える）
-const APP_VERSION = '1.3.0', APP_DATE = '2026-11-22';
+const APP_VERSION = '1.4.0', APP_DATE = '2026-11-22';
 $('#ver').textContent = `作者 Shinsuke Kato ・ バージョン ${APP_VERSION}（${APP_DATE}）`;
 bind();
 markTpl();
