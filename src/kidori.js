@@ -1,7 +1,7 @@
 // 木取り：どれだけの大きさの板があれば部材が取れるか
 // 側板・背板・前板は板厚 t の板から、底板は厚さ g の板から取る。
 // 木目はすべて部材の長さ方向（箱のまわりを水平に回る向き）。部材ごとに残しろ a を長さ・幅に足す。
-import { cutList } from './geometry.js?v=20261122u';
+import { cutList } from './geometry.js?v=20261122v';
 
 export const KIDORI_DEFAULTS = { boardW: 0, allow: 3 }; // boardW 0 = 必要な最小の幅
 
