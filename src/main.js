@@ -1,7 +1,8 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122f';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122f';
-import { buildSheets, fmt } from './drawing.js?v=20261122f';
-import { View3D } from './view3d.js?v=20261122f';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122g';
+import { solidSTL } from './solid.js?v=20261122g';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122g';
+import { buildSheets, fmt } from './drawing.js?v=20261122g';
+import { View3D } from './view3d.js?v=20261122g';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -169,6 +170,18 @@ function bind() {
   $('#o-explode').addEventListener('change', (e) => view.setOpts({ explode: e.target.checked }));
   $('#o-stack').addEventListener('change', (e) => { view.setOpts({ stack: e.target.checked }); view.fit(); });
   $('#fit').addEventListener('click', () => view.fit());
+  // 3Dプリント用：一塊の立体を STL で保存
+  $('#stl').addEventListener('click', () => {
+    if (!box || !$('#blocked').hidden) return;
+    const blob = solidSTL(params, { fillFloor: $('#stl-fill').checked });
+    const d = dims(), r = (x) => Math.round(x * 10) / 10;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `parts-box_W${r(d.W)}_L${r(d.depth)}_H${r(d.H)}_t${r(params.t)}.stl`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast('STL を保存しました（単位 mm）');
+  });
   $('#reset').addEventListener('click', () => { params = { ...DEFAULTS }; $('#auto-gc').checked = true; setKeep('out'); $('#tpl').value = ''; markTpl(); update(); view.fit(); });
   $('#share').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(location.href); toast('URLをコピーしました'); } catch { toast('コピーできませんでした。アドレス欄のURLを使ってください'); }
@@ -283,7 +296,7 @@ function toast(s) {
 const view = new View3D($('#view3d'));
 readHash();
 // アプリの版（直したら上げる。index.html と import の ?v= も合わせて変える）
-const APP_VERSION = '1.0.0', APP_DATE = '2026-11-21';
+const APP_VERSION = '1.1.0', APP_DATE = '2026-11-22';
 $('#ver').textContent = `作者 Shinsuke Kato ・ バージョン ${APP_VERSION}（${APP_DATE}）`;
 bind();
 markTpl();

@@ -6,7 +6,7 @@
 <title>パーツ箱ジェネレーター</title>
 <meta name="description" content="寸法を変えるだけで、留め組みのパーツ箱の3Dモデルと手加工用の図面ができるツール">
 <meta name="author" content="Shinsuke Kato">
-<link rel="stylesheet" href="style.css?v=20261122f">
+<link rel="stylesheet" href="style.css?v=20261122g">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -99,6 +99,9 @@
         <label><input type="checkbox" id="o-explode"> 分解</label>
         <label><input type="checkbox" id="o-stack"> 2段積み</label>
         <button id="fit">全体表示</button>
+        <span class="vb-sep"></span>
+        <label title="底板の下のすき間を埋めて、支えなしで刷れるようにします"><input type="checkbox" id="stl-fill" checked> 底の下を埋める</label>
+        <button id="stl">3Dプリント用 STL を保存</button>
       </div>
     </div>
     <div id="tab-sheets" class="pane">
@@ -128,6 +131,6 @@
 <div id="print-area" class="print-area"></div>
 <div id="toast" class="toast" hidden></div>
 
-<script type="module" src="src/main.js?v=20261122f"></script>
+<script type="module" src="src/main.js?v=20261122g"></script>
 </body>
 </html>

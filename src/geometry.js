@@ -45,7 +45,7 @@ const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, 
 export const V = { sub, add, mul, dot, cross, norm };
 
 // 半空間 n·p <= k（nは正規化する）
-function hs(n, k) { const l = Math.hypot(...n); return { n: [n[0] / l, n[1] / l, n[2] / l], k: k / l }; }
+export function hs(n, k) { const l = Math.hypot(...n); return { n: [n[0] / l, n[1] / l, n[2] / l], k: k / l }; }
 
 // ---------- 凸多面体の切断 ----------
 function boxPoly(s) {
@@ -99,7 +99,7 @@ function orderCap(pts, n) {
     .map((o) => o.p);
 }
 
-function convex(planes) {
+export function convex(planes) {
   let f = boxPoly(1e5);
   planes.forEach((pl) => { f = clip(f, pl, pl.tag || null); });
   return f;
