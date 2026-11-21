@@ -6,7 +6,7 @@
 <title>パーツ箱ジェネレーター</title>
 <meta name="description" content="寸法を変えるだけで、留め組みのパーツ箱の3Dモデルと手加工用の図面ができるツール">
 <meta name="author" content="Shinsuke Kato">
-<link rel="stylesheet" href="style.css?v=20261122r">
+<link rel="stylesheet" href="style.css?v=20261122s">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -23,6 +23,12 @@
     <button class="tab" data-tab="list">木取り</button>
     <button class="tab" data-tab="print3d">3Dプリント</button>
   </nav>
+  <!-- 3Dプリントタブのときだけ出す（そのときは「図面を印刷」の代わり） -->
+  <div class="p3-actions">
+    <label title="底板の下のくぼみを埋めて、底を詰まった形にします"><input type="checkbox" id="stl-fill"> 底の下を埋める</label>
+    <button id="pfit">全体表示</button>
+    <button id="stl" class="primary">STL を保存</button>
+  </div>
   <button id="print" class="primary">図面を印刷 / PDF</button>
 </header>
 
@@ -109,11 +115,6 @@
     <div id="tab-print3d" class="pane">
       <div id="pview" class="view3d"></div>
       <div class="p3-info" id="p3-info"></div>
-      <div class="viewbar">
-        <label title="底板の下のくぼみを埋めて、底を詰まった形にします"><input type="checkbox" id="stl-fill"> 底の下を埋める</label>
-        <button id="pfit">全体表示</button>
-        <button id="stl" class="primary">STL を保存</button>
-      </div>
     </div>
     <div id="tab-list" class="pane">
       <div class="listwrap">
@@ -138,6 +139,6 @@
 <div id="print-area" class="print-area"></div>
 <div id="toast" class="toast" hidden></div>
 
-<script type="module" src="src/main.js?v=20261122r"></script>
+<script type="module" src="src/main.js?v=20261122s"></script>
 </body>
 </html>

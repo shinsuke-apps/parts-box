@@ -96,7 +96,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); margin: 0 0 6px; }
 .blocked-box b { display: block; font-size: 17px; color: var(--warn-ink); margin-bottom: 8px; }
 .blocked-box ul { margin: 0 0 10px; padding-left: 1.2em; line-height: 1.6; }
 .blocked-box p { margin: 0; font-size: 13px; color: var(--muted); }
-#print:disabled { opacity: .45; cursor: not-allowed; }
+#print:disabled, #stl:disabled { opacity: .45; cursor: not-allowed; }
+.p3-actions { display: none; align-items: center; gap: 10px; }
+.p3-actions label { display: flex; gap: 4px; align-items: center; cursor: pointer; white-space: nowrap; }
+body[data-tab="print3d"] .p3-actions { display: flex; }
+body[data-tab="print3d"] #print { display: none; }
 .view3d { position: absolute; inset: 0; }
 .view3d canvas { display: block; }
 .dimlayer { position: absolute; inset: 0; pointer-events: none; }

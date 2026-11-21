@@ -1,9 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122r';
-import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122r';
-import { PrintView } from './print3d.js?v=20261122r';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122r';
-import { buildSheets, fmt } from './drawing.js?v=20261122r';
-import { View3D } from './view3d.js?v=20261122r';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122s';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122s';
+import { PrintView } from './print3d.js?v=20261122s';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122s';
+import { buildSheets, fmt } from './drawing.js?v=20261122s';
+import { View3D } from './view3d.js?v=20261122s';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -205,6 +205,7 @@ function keepGcMm() {
 
 function setTab(t) {
   tab = t;
+  document.body.dataset.tab = t; // 右上のボタンをタブに合わせて切り替える
   $$('.tab').forEach((b) => b.classList.toggle('is-on', b.dataset.tab === t));
   $$('.pane').forEach((p) => p.classList.toggle('is-on', p.id === 'tab-' + t));
   if (t === 'sheets') renderSheets();
@@ -252,6 +253,7 @@ function update(except) {
   $('#blocked').hidden = ok;
   $('#blocked-list').innerHTML = blocks.map((w) => `<li>${w}</li>`).join('');
   $('#print').disabled = !ok;
+  $('#stl').disabled = !ok;
   $('#print').title = ok ? '' : 'この寸法では作れないので印刷できません';
   if (!ok) return;
   box = buildBox(params);
