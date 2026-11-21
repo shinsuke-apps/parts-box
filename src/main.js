@@ -1,8 +1,9 @@
-import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122g';
-import { solidSTL } from './solid.js?v=20261122g';
-import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122g';
-import { buildSheets, fmt } from './drawing.js?v=20261122g';
-import { View3D } from './view3d.js?v=20261122g';
+import { DEFAULTS, derive, validate, buildBox } from './geometry.js?v=20261122h';
+import { solidSTL, solidTriangles, checkSolid } from './solid.js?v=20261122h';
+import { PrintView } from './print3d.js?v=20261122h';
+import { layoutBoards, kidoriSummary, boardSVG, KIDORI_DEFAULTS } from './kidori.js?v=20261122h';
+import { buildSheets, fmt } from './drawing.js?v=20261122h';
+import { View3D } from './view3d.js?v=20261122h';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
@@ -182,6 +183,8 @@ function bind() {
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     toast('STL を保存しました（単位 mm）');
   });
+  $('#stl-fill').addEventListener('change', () => { printDirty = true; renderPrint(); });
+  $('#pfit').addEventListener('click', () => pview && pview.fit());
   $('#reset').addEventListener('click', () => { params = { ...DEFAULTS }; $('#auto-gc').checked = true; setKeep('out'); $('#tpl').value = ''; markTpl(); update(); view.fit(); });
   $('#share').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(location.href); toast('URLをコピーしました'); } catch { toast('コピーできませんでした。アドレス欄のURLを使ってください'); }
@@ -206,6 +209,24 @@ function setTab(t) {
   $$('.pane').forEach((p) => p.classList.toggle('is-on', p.id === 'tab-' + t));
   if (t === 'sheets') renderSheets();
   if (t === 'model') view.resize();
+  if (t === 'print3d') renderPrint();
+}
+
+// ---------- 3Dプリント（書き出す立体のプレビュー） ----------
+let pview = null, printDirty = true;
+function renderPrint() {
+  if (tab !== 'print3d' || !box || !printDirty) return;
+  if (!pview) pview = new PrintView($('#pview')); // 初めて開いたときに作る
+  pview.resize();
+  const fill = $('#stl-fill').checked;
+  const tris = solidTriangles(box.v, { fillFloor: fill });
+  pview.setTriangles(tris);
+  const ck = checkSolid(tris), v = box.v;
+  $('#p3-info').innerHTML = `<b>3Dプリント用の立体（一塊）</b>` +
+    `外形 ${fmt(v.W)} × ${fmt(v.depth)} × ${fmt(v.H)} mm<br>` +
+    `体積 約 ${(ck.volume / 1000).toFixed(0)} cm³ ・ 三角形 ${ck.triangles} ・ ${ck.badEdges ? `<span style="color:var(--warn-ink)">すき間あり（${ck.badEdges}）</span>` : 'すき間なし'}` +
+    `<small>${fill ? '底板の下を埋めています。底を下にして、支えなしで刷れます。' : '底板の下が空いています（実物どおり）。縁を下にして刷るか、支えを付けてください。'}溝の小さな穴は埋めてあります。</small>`;
+  printDirty = false;
 }
 
 // ---------- 更新 ----------
@@ -237,8 +258,10 @@ function update(except) {
   view.setBox(box);
   renderList();
   sheetsDirty = true;
+  printDirty = true;
   clearTimeout(timer);
   if (tab === 'sheets') timer = setTimeout(renderSheets, 120);
+  if (tab === 'print3d') timer = setTimeout(renderPrint, 60);
 }
 
 let lastSheets = [];
@@ -296,7 +319,7 @@ function toast(s) {
 const view = new View3D($('#view3d'));
 readHash();
 // アプリの版（直したら上げる。index.html と import の ?v= も合わせて変える）
-const APP_VERSION = '1.1.0', APP_DATE = '2026-11-22';
+const APP_VERSION = '1.2.0', APP_DATE = '2026-11-22';
 $('#ver').textContent = `作者 Shinsuke Kato ・ バージョン ${APP_VERSION}（${APP_DATE}）`;
 bind();
 markTpl();

@@ -1,7 +1,7 @@
 // 3Dプリント用：箱を「一塊」のすき間のない立体にして STL で書き出す
 // 部材を積み上げるのではなく、外形（凸）から内側の空間（凸の組）を引いて作る。
 // そのため部材どうしの継ぎ目の面はなく、溝が前の留めに抜ける小さな穴も埋まる。
-import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122g';
+import { convex, hs, derive, faceNormal } from './geometry.js?v=20261122h';
 
 const S2 = Math.SQRT2;
 const EPS = 1e-6;
