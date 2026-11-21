@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>パーツ箱ジェネレーター</title>
+<meta name="description" content="寸法を変えるだけで、留め組みのパーツ箱の3Dモデルと手加工用の図面ができるツール">
+<meta name="author" content="Shinsuke Kato">
+<link rel="stylesheet" href="style.css?v=20261122f">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header class="top">
+  <h1>パーツ箱ジェネレーター</h1>
+  <nav class="tabs" role="tablist">
+    <button class="tab is-on" data-tab="model">3D</button>
+    <button class="tab" data-tab="sheets">図面</button>
+    <button class="tab" data-tab="list">木取り</button>
+  </nav>
+  <button id="print" class="primary">図面を印刷 / PDF</button>
+</header>
+
+<main class="layout">
+  <aside class="panel">
+    <section class="dimgrid" aria-label="寸法">
+      <span></span><span class="dh">外寸</span><span class="dh">内寸</span>
+      <span class="dl">幅</span>
+      <input type="number" data-mm="W" step="1" min="20" aria-label="幅 外寸">
+      <input type="number" data-mm="iw" step="1" min="5" aria-label="幅 内寸">
+      <span class="dl">奥行</span>
+      <input type="number" data-mm="depth" step="1" min="20" aria-label="奥行 外寸（先端まで）">
+      <input type="number" data-mm="id" step="1" min="5" aria-label="奥行 内寸（底面）">
+      <span class="dl">高さ<small>／深さ</small></span>
+      <input type="number" data-mm="H" step="1" min="20" aria-label="高さ 外寸">
+      <input type="number" data-mm="ih" step="1" min="5" aria-label="深さ 内寸（底板の上から縁まで）" title="深さは底板の上から縁まで">
+      <span></span><small class="dn">奥行は先端まで</small><small class="dn">奥行は底面で</small>
+    </section>
+    <section class="inputs tblock">
+      <label class="row"><span>t <small>板厚 mm</small></span><input type="number" data-k="t" step="0.5" min="2"></label>
+      <input type="range" data-r="t" min="3" max="30" step="0.5">
+      <div class="keep"><span>板厚を変えたとき</span>
+        <div class="seg" role="radiogroup">
+          <button class="seg-b is-on" data-keep="out" role="radio" aria-checked="true">外寸を保つ</button>
+          <button class="seg-b" data-keep="in" role="radio" aria-checked="false">内寸を保つ</button>
+        </div>
+      </div>
+    </section>
+    <div class="dimtools">
+      <button id="reset">初期値に戻す</button>
+      <select id="tpl" aria-label="テンプレート">
+        <option value="">テンプレート…</option>
+        <optgroup label="コピー用紙500枚が入る箱">
+          <option value="A5">A5</option><option value="B5">B5</option><option value="A4">A4</option><option value="B4">B4</option><option value="A3">A3</option>
+        </optgroup>
+      </select>
+      <label class="clr is-off">ゆとり <small>両側の合計</small>
+        <input type="number" id="clr" value="3" step="0.5" min="0" disabled aria-label="テンプレートのゆとり（両側の合計 mm）"> mm
+        <small id="clr-half">片側 1.5mm</small>
+      </label>
+    </div>
+    <button id="swap" class="swap" title="内寸の幅と奥行を入れ替えます">⇄ 縦横を入れ替え <small>（内寸の幅と奥行）</small></button>
+    <p class="hint0 gap">内寸の深さは底板の上から縁まで。前板が45°に傾いているので、高さ（深さ）を変えると外の奥行も変わります。</p>
+
+    <section class="inputs">
+      <details class="adv">
+        <summary>溝と面取り</summary>
+        <label class="row chk"><input type="checkbox" id="auto-gc" checked> 板厚から自動（溝 t/3、面取り 2t/3）</label>
+        <label class="row"><span>溝・底板厚 <small>mm</small></span><input type="number" id="g-mm" step="0.5" min="0.5"></label>
+        <label class="row"><span>面取り <small>mm</small></span><input type="number" id="c-mm" step="0.5" min="0"></label>
+      </details>
+    </section>
+
+    <dl class="derived" id="derived"></dl>
+    <ul class="warn" id="warn"></ul>
+
+    <div class="btns">
+      <button id="share">この寸法のURLをコピー</button>
+    </div>
+    <p class="foot" id="ver"></p>
+  </aside>
+
+  <section class="stage">
+    <div id="blocked" class="blocked" role="alert" hidden>
+      <div class="blocked-box">
+        <b>この寸法では作れません</b>
+        <ul id="blocked-list"></ul>
+        <p>左の入力欄で寸法を直すと、3D・図面・木取りがまた表示されます。</p>
+      </div>
+    </div>
+    <div id="tab-model" class="pane is-on">
+      <div id="view3d" class="view3d"></div>
+      <div class="viewbar">
+        <label>寸法表示 <select id="o-dims"><option value="out">外寸</option><option value="in">内寸</option><option value="">なし</option></select></label>
+        <label><input type="checkbox" id="o-explode"> 分解</label>
+        <label><input type="checkbox" id="o-stack"> 2段積み</label>
+        <button id="fit">全体表示</button>
+      </div>
+    </div>
+    <div id="tab-sheets" class="pane">
+      <div class="sheetnav" id="sheetnav"></div>
+      <div id="sheets" class="sheets"></div>
+    </div>
+    <div id="tab-list" class="pane">
+      <div class="listwrap">
+        <h2>木取り（必要な板）</h2>
+        <div class="kd-in">
+          <label>板の幅 <input type="number" id="kd-w" min="10" step="1" placeholder="最小"> mm <small id="kd-wmin"></small></label>
+          <label>残しろ <input type="number" id="kd-a" min="0" step="0.5" value="3"> mm <small>部材1枚ごとに長さ・幅へ足す</small></label>
+        </div>
+        <p class="kd-legend">太い線＝部材の外形（仕上がり）、細い破線＝切り出す大きさ（残しろ込み）</p>
+        <p class="kd-sum" id="kd-sum"></p>
+        <div class="kd-fig" id="kd-fig"></div>
+        <p class="kd-sum" id="kd-bot"></p>
+        <div class="kd-fig kd-fig-bot" id="kd-figb"></div>
+        <p class="kd-note" id="kd-note"></p>
+        <h2>加工の流れ（例）</h2>
+        <ol class="howto" id="howto"></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="print-area" class="print-area"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="src/main.js?v=20261122f"></script>
+</body>
+</html>
