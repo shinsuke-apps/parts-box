@@ -33,7 +33,7 @@ export class View3D {
     this.labels = new CSS2DRenderer();
     this.labels.domElement.className = 'dimlayer';
     el.appendChild(this.labels.domElement);
-    this.opts = { explode: false, stack: false, dims: 'out' };
+    this.opts = { explode: false, stack: false, dims: ['out'] };
     this.fitted = false;
     new ResizeObserver(() => this.resize()).observe(el);
     const loop = () => {
@@ -79,8 +79,13 @@ export class View3D {
   buildDims() {
     this.dimGroup.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); if (o.element) o.element.remove(); });
     this.dimGroup.clear();
-    const mode = this.opts.dims;
-    if (!mode || this.opts.explode || this.opts.stack || !this.box) return;
+    // dims: 出す寸法の組（'out' 外寸・'in' 内寸）。両方なら両方出す
+    const modes = [].concat(this.opts.dims || []).filter(Boolean);
+    if (!modes.length || this.opts.explode || this.opts.stack || !this.box) return;
+    for (const mode of modes) this.buildDimSet(mode);
+  }
+
+  buildDimSet(mode) {
     const v = this.box.v, hw = v.W / 2, t = v.t, S2 = Math.SQRT2;
     const off = Math.max(v.W, v.depth, v.H) * 0.08, tk = off * 0.18;
     const segs = [];
